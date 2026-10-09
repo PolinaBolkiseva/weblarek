@@ -1,16 +1,44 @@
-import { apiProducts } from './utils/data';
-import './scss/styles.scss';
-import { Buyer } from './components/models/Buyer';
-import { ProductCatalog } from './components/models/ProductCatalog';
-import { ProductBasket } from './components/models/ProductBasket';
+import "./scss/styles.scss";
+import { Api } from "./components/base/Api";
+import { LarekApi } from "./components/comunication/LarekApi";
+import { API_URL } from "./utils/constants";
+import { Buyer } from "./components/models/Buyer";
+import { ProductCatalog } from "./components/models/ProductCatalog";
+import { ProductBasket } from "./components/models/ProductBasket";
 
-const myBuyer = new Buyer('cash', 'polya-sonya', '+7...', 'Восточная...');
-console.log('myBuyer: ', myBuyer.getBuyer()) ;
+const larekApi = new LarekApi(new Api(API_URL));
+const buyer = new Buyer(
+  "cash",
+  "polya-sonya@test.com",
+  "+79990001122",
+  "Восточная",
+);
+const catalog = new ProductCatalog();
+const basket = new ProductBasket();
 
-const myProductCatalog = new ProductCatalog ();
-myProductCatalog.setProductList(apiProducts.items); 
-console.log('Массив товаров из каталога: ', myProductCatalog.getProductList()) ;
+larekApi
+  .getProductList()
+  .then((data) => {
+    catalog.setProductList(data.items);
+    console.log("Ответ каталога: ", data);
+    console.log("Товары в модели: ", catalog.getProductList());
 
-const myProductBasket= new ProductBasket ();
-myProductBasket.pushProduct(myProductCatalog.getProductList()[0]);
-console.log('Массив товаров из корзины: ', myProductBasket.getProductList()) ;
+    const firstProduct = catalog.getProductList()[0];
+    if (firstProduct) {
+      basket.pushProduct(firstProduct);
+    }
+    console.log("Корзина: ", basket.getProductList());
+
+    return larekApi.createOrder({
+      ...buyer.getBuyer(),
+      total: basket.totalSum(),
+      items: Object.keys(basket.getProductList()),
+    });
+  })
+  .then((order) => {
+    console.log("Ответ заказа: ", order);
+    console.log("id заказа: ", order.id, "сумма: ", order.total);
+  })
+  .catch((error) => {
+    console.error("Ошибка запроса: ", error);
+  });

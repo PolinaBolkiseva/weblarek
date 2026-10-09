@@ -6,6 +6,7 @@
 - src/ — исходные файлы проекта
 - src/components/ — папка с JS компонентами
 - src/components/base/ — папка с базовым кодом
+- src/components/comunication/ — папка с классами для запросов к серверу
 
 Важные файлы:
 - index.html — HTML-файл главной страницы
@@ -204,3 +205,18 @@ Presenter - презентер содержит основную логику п
 `isValidPhone(): boolean` - проверяет, что телефон не пустой; при ошибке пишет текст в errorList['phone'], при успехе удаляет эту ошибку  
 `isValidAddress(): boolean` - проверяет, что адрес не пустой; при ошибке пишет текст в errorList['address'], при успехе удаляет эту ошибку  
 `isValid(): boolean` - запускает все четыре проверки и возвращает true, если все поля валидны 
+
+### Слой коммуникации
+
+#### Класс LarekApi
+Класс для запросов к API магазина. Использует композицию: внутри хранит экземпляр Api (через интерфейс IApi) и вызывает его методы get и post.
+
+Конструктор:  
+`constructor(api: IApi)` - принимает объект, реализующий IApi, и сохраняет его в поле api
+
+Поля класса:  
+`api: IApi` - экземпляр для отправки HTTP-запросов
+
+Методы класса:  
+`getProductList(): Promise<IProductListResponse>` - выполняет GET-запрос на эндпоинт /product и возвращает промис с объектом { count: number, items: IProduct[] }  
+`createOrder(data: IOrderRequest): Promise<IOrderResponse>` - выполняет POST-запрос на эндпоинт /order, отправляет данные заказа и возвращает промис с объектом { id: string, total: number }
