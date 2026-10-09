@@ -4,6 +4,7 @@ import type {
   IOrderRequest,
   IOrderResponse,
 } from "../../types";
+import { PRODUCT_ENDPOINT, ORDER_ENDPOINT } from "../../utils/constants";
 
 export class LarekApi {
   protected api: IApi;
@@ -13,10 +14,10 @@ export class LarekApi {
   }
 
   getProductList(): Promise<IProductListResponse> {
-    return this.api.get<IProductListResponse>("/product");
+    return this.api.get<IProductListResponse>(PRODUCT_ENDPOINT);
   }
 
   createOrder(data: IOrderRequest): Promise<IOrderResponse> {
-    return this.api.post<IOrderResponse>("/order", data);
+    return this.api.post<IOrderResponse>(ORDER_ENDPOINT, data);
   }
 }

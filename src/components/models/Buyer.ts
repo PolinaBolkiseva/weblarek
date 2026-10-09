@@ -53,6 +53,10 @@ export class Buyer implements IBuyer {
       address: this.address,
     };
   }
+
+  getErrorList(): TErrors {
+    return { ...this.errorList };
+  }
   //очистка данных покупателя;
   clear(): void {
     this.payment = "";
@@ -78,7 +82,7 @@ export class Buyer implements IBuyer {
 
   isValidEmail(): boolean {
     if (this.email === "") {
-      this.errorList["email"] = "способ оплаты не выбран";
+      this.errorList["email"] = "E-mail не указан";
       return false;
     } else {
       delete this.errorList["email"];
@@ -107,11 +111,10 @@ export class Buyer implements IBuyer {
   }
 
   isValid(): boolean {
-    return (
-      this.isValidPayment() &&
-      this.isValidEmail() &&
-      this.isValidPhone() &&
-      this.isValidAddress()
-    );
+    const isPaymentValid = this.isValidPayment();
+    const isEmailValid = this.isValidEmail();
+    const isPhoneValid = this.isValidPhone();
+    const isAddressValid = this.isValidAddress();
+    return isPaymentValid && isEmailValid && isPhoneValid && isAddressValid;
   }
 }

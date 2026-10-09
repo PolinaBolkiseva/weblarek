@@ -7,6 +7,9 @@ export const API_URL = `${import.meta.env.VITE_API_ORIGIN}/api/weblarek`;
 которое хранится в объекте товара. */
 export const CDN_URL = `${import.meta.env.VITE_API_ORIGIN}/content/weblarek`;
 
+export const PRODUCT_ENDPOINT = "/product";
+export const ORDER_ENDPOINT = "/order";
+
 /* Константа соответствий категорий товара модификаторам, используемым для отображения фона категории. */
 export const categoryMap = {
   'софт-скил': 'card__category_soft',

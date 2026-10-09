@@ -6,7 +6,7 @@
 - src/ — исходные файлы проекта
 - src/components/ — папка с JS компонентами
 - src/components/base/ — папка с базовым кодом
-- src/components/comunication/ — папка с классами для запросов к серверу
+- src/components/communication/ — папка с классами для запросов к серверу
 
 Важные файлы:
 - index.html — HTML-файл главной страницы
@@ -100,41 +100,71 @@ Presenter - презентер содержит основную логику п
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
 ### Данные
+Типы объявлены в `src/types/index.ts`.
+
+#### Алиасы
+`ApiPostMethods` - `'POST' | 'PUT' | 'DELETE'` - методы HTTP-запроса, которые принимает post  
+`TPayment` - `'card' | 'cash' | ''` - способ оплаты; пустая строка означает, что способ не выбран  
+`TProductId` - `string` - идентификатор товара  
+`TProductList` - `IProduct[]` - массив товаров каталога  
+`TProductBasket` - объект корзины: ключ `TProductId`, значение `{ title: string; price: number | null; count: number }`  
+`TErrors` - `{ [field: string]: string }` - словарь ошибок валидации: ключ - имя поля, значение - текст ошибки  
+
+Эндпоинты API заданы константами в `src/utils/constants.ts`: `PRODUCT_ENDPOINT` (`/product`), `ORDER_ENDPOINT` (`/order`).
+
+#### Интерфейс IApi
+Контракт HTTP-клиента. Класс Api реализует этот интерфейс по структуре, LarekApi принимает IApi в конструкторе.
+
+Методы:  
+`get<T extends object>(uri: string): Promise<T>` - GET-запрос, T - тип ответа  
+`post<T extends object>(uri: string, data: object, method?: ApiPostMethods): Promise<T>` - запрос с телом, по умолчанию POST  
+
 #### Интерфейс IProduct
 Интерфейс описывает единицу товара.
 
 Поля интерфейса:  
-`id: string`          - идентификатор товара;
-`description: string` - описание товара; 
-`image: string`       - изображение товара;
-`title: string`       - наименование товара;
-`category: string`    - категория (тип) товара;
-`price?: number`      - цена товара - опциональный параметр.
+`id: TProductId` - идентификатор товара  
+`description: string` - описание товара  
+`image: string` - изображение товара  
+`title: string` - наименование товара  
+`category: string` - категория (тип) товара  
+`price: number | null` - цена товара; null, если товар бесценный  
 
 #### Интерфейс IBuyer
 Интерфейс описывает покупателя, хранит его контактные данные.
 
-Поля интерфейса:
-  `payment: TPayment`- способ оплаты; 
-  `email: string`    - E-mail покупателя;
-  `phone: string`    - телефон покупателя;
-  `address: string`  - адрес покупателя.
+Поля интерфейса:  
+`payment: TPayment` - способ оплаты  
+`email: string` - E-mail покупателя  
+`phone: string` - телефон покупателя  
+`address: string` - адрес покупателя  
+
+#### Интерфейс IProductListResponse
+Ответ сервера на GET каталога.
+
+Поля:  
+`count: number` - количество товаров в выдаче  
+`items: TProductList` - массив товаров  
+
+#### Интерфейс IOrderRequest
+Тело POST-запроса на оформление заказа.
+
+Поля:  
+`payment: TPayment` - способ оплаты  
+`email: string` - E-mail  
+`phone: string` - телефон  
+`address: string` - адрес  
+`total: number` - сумма заказа  
+`items: TProductId[]` - идентификаторы товаров  
+
+#### Интерфейс IOrderResponse
+Успешный ответ сервера на оформление заказа.
+
+Поля:  
+`id: string` - идентификатор созданного заказа  
+`total: number` - сумма, которую зафиксировал сервер
 
 ### Модели данных
-
-##### Класс Product 
-Реализует интерфейс IProduct.
-
-Конструктор:
-  constructor ( id: string;
-                description: string;
-                image: string;
-                title: string;
-                category: string;
-                price?: number)
-  `- в конструктор передаются идентификационный номер, описание, изображение, наименование, категорию и цену товара. Цена товара - число - может быть не указана (опциональный параметр).
-  `- ИД и наименование товара не должны быть пустыми строками.
-  `- Во все остальные параметры допускается передать пустую строку.
 
 ##### Класс ProductCatalog
 Хранит список товаров каталога и товар, выбранный для подробного отображения.
@@ -147,7 +177,7 @@ Presenter - презентер содержит основную логику п
 `currentProduct: IProduct | null` - товар для подробного отображения
 
 Методы класса:  
-`setProductList(ArrProduct: IProduct[]): void` - сохраняет в модели массив товаров, полученный в параметре  
+`setProductList(products: IProduct[]): void` - сохраняет в модели массив товаров, полученный в параметре  
 `getProductList(): TProductList` - возвращает копию массива товаров из модели  
 `getProduct(id: string): IProduct | null` - возвращает товар по id; если id пустой или товар не найден, возвращает null  
 `setCurrentProduct(id: string): void` - сохраняет в currentProduct товар для подробного отображения, найденный по id  
@@ -173,38 +203,31 @@ Presenter - презентер содержит основную логику п
 `updateProduct(product: IProduct): void` - обновляет название и цену товара в корзине, если товар с таким id уже есть
 
 ##### Класс Buyer
-Реализует интерфейс IBuyer.
+Реализует интерфейс IBuyer. Хранит контактные данные покупателя и ошибки валидации.
 
-Конструктор:
-  constructor ( id: string;
-                description: string;
-                image: string;
-                title: string;
-                category: string;
-                price?: number)
-  `- в конструктор передаются идентификационный номер, описание, изображение, наименование, категорию и цену товара. Цена товара - число - может быть не указана (опциональный параметр).
-  `- ИД и наименование товара не должны быть пустыми строками.
-  `- Во все остальные параметры допускается передать пустую строку.
+Конструктор:  
+`constructor(payment: TPayment, email: string, phone: string, address: string)` - принимает способ оплаты, email, телефон и адрес; errorList инициализируется пустым объектом
 
-Поля класса:
-  `payment: TPayment` - вид оплаты.
-  `email: string` - E-mail покупателя. 
-  `phone: string` - номер телефона покупателя.
-  `address: string` - адрес покупателя.
-  `errorList: TErrors` - объект в котором храниятся описание ошибок, ключ - имя поля.
-                          {'поле': 'текст ошибки'}. 
+Поля класса:  
+`payment: TPayment` - вид оплаты  
+`email: string` - E-mail покупателя  
+`phone: string` - номер телефона покупателя  
+`address: string` - адрес покупателя  
+`errorList: TErrors` - объект ошибок, ключ - имя поля, значение - текст ошибки
+
 Методы класса:  
 `setPayment(payment: TPayment): void` - записывает способ оплаты в поле payment и вызывает проверку isValidPayment  
 `setEmail(email: string): void` - записывает email в поле email и вызывает проверку isValidEmail  
 `setPhone(phone: string): void` - записывает телефон в поле phone и вызывает проверку isValidPhone  
 `setAddress(address: string): void` - записывает адрес в поле address и вызывает проверку isValidAddress  
 `getBuyer(): IBuyer` - возвращает объект с текущими данными покупателя: payment, email, phone, address  
+`getErrorList(): TErrors` - возвращает копию объекта ошибок валидации  
 `clear(): void` - очищает данные покупателя и объект ошибок errorList  
 `isValidPayment(): boolean` - проверяет, что способ оплаты не пустой; при ошибке пишет текст в errorList['payment'], при успехе удаляет эту ошибку  
 `isValidEmail(): boolean` - проверяет, что email не пустой; при ошибке пишет текст в errorList['email'], при успехе удаляет эту ошибку  
 `isValidPhone(): boolean` - проверяет, что телефон не пустой; при ошибке пишет текст в errorList['phone'], при успехе удаляет эту ошибку  
 `isValidAddress(): boolean` - проверяет, что адрес не пустой; при ошибке пишет текст в errorList['address'], при успехе удаляет эту ошибку  
-`isValid(): boolean` - запускает все четыре проверки и возвращает true, если все поля валидны 
+`isValid(): boolean` - запускает все четыре проверки независимо друг от друга и возвращает true, если все поля валидны 
 
 ### Слой коммуникации
 
@@ -218,5 +241,5 @@ Presenter - презентер содержит основную логику п
 `api: IApi` - экземпляр для отправки HTTP-запросов
 
 Методы класса:  
-`getProductList(): Promise<IProductListResponse>` - выполняет GET-запрос на эндпоинт /product и возвращает промис с объектом { count: number, items: IProduct[] }  
-`createOrder(data: IOrderRequest): Promise<IOrderResponse>` - выполняет POST-запрос на эндпоинт /order, отправляет данные заказа и возвращает промис с объектом { id: string, total: number }
+`getProductList(): Promise<IProductListResponse>` - выполняет GET-запрос на PRODUCT_ENDPOINT и возвращает промис с объектом IProductListResponse  
+`createOrder(data: IOrderRequest): Promise<IOrderResponse>` - выполняет POST-запрос на ORDER_ENDPOINT, отправляет IOrderRequest и возвращает промис с IOrderResponse

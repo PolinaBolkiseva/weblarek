@@ -11,9 +11,9 @@ export class ProductCatalog {
 
   //Методы
   //сохранение массива товаров полученного в параметрах метода;
-  setProductList(ArrProduct: IProduct[]): void {
+  setProductList(products: IProduct[]): void {
     this.productList = [];
-    for (const product of ArrProduct) {
+    for (const product of products) {
       this.productList.push(product);
     }
   }
