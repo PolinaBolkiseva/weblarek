@@ -1,10 +1,15 @@
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 export type TPayment = 'card' | 'cash' | '';
 export type TProductId = string;
-export type TProductList = Set<TProductId>;
+export type TProductList = IProduct[];
 export type TProductBasket = {
-  [id_product: string]: number;
+  [id_product: string]: {
+    title: string;
+    price: number | null;
+    count: number;
+  };
 };
+
 export type TErrors = {
     [object: string]: string; //объект: описание ошибки
 }

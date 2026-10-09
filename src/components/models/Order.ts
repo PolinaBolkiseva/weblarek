@@ -1,9 +1,10 @@
 import type { TProductBasket, IBuyer , TErrors} from '../../types';
 
-class Order {
+export class Order {
   protected buyer: IBuyer;
   protected productList: TProductBasket = {};
   protected errors: TErrors;
+
   constructor ( buyer: IBuyer, 
                 productList: TProductBasket = {}
               ) 
@@ -18,4 +19,5 @@ class Order {
     else
       this.productList = { ...productList }; //structuredClone(productList);
   }
+
 }

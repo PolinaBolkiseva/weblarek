@@ -1,6 +1,6 @@
 import type { IProduct } from '../../types';
 
-class Product implements IProduct {
+export class Product implements IProduct {
   id: string;
   description: string;
   image: string;
@@ -13,7 +13,7 @@ class Product implements IProduct {
                 image: string,
                 title: string,
                 category: string,
-                price?: number) 
+                price?: number | null) 
   {
     if (id != '')
         this.id = id;
@@ -33,6 +33,17 @@ class Product implements IProduct {
   }
 
 // Методы
+  setPrice (newPrice: number): void {
+    if (newPrice > 0)
+        this.price = newPrice;
+    else if (newPrice = 0)
+        this.price = null;
+  }
 
-
+  getPrice (): number {
+    if (this.price == null)
+        return 0;
+    else
+        return this.price;
+  }
 }
