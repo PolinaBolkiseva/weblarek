@@ -1,70 +1,48 @@
-import type { IProduct, TProductBasket } from "../../types";
+import type { IProduct, TProductId, TProductList } from "../../types";
 
 export class ProductBasket {
-  protected productList: TProductBasket = {};
+  protected productList: TProductList = [];
 
   //Методы
-  //получение объекта со списком товаров, которые находятся в корзине;
-  getProductList(): TProductBasket {
-    return { ...this.productList };
+  //получение массива со списком товаров, которые находятся в корзине;
+  getProductList(): TProductList {
+    return this.productList;
   }
-  //добавление товара, который был получен в параметре, в объект корзины;
+  //добавление товара, который был получен в параметре, в массив корзины;
   pushProduct(product: IProduct) {
     if (product.id !== "") {
-      if (this.hasProduct(product.id)) {
-        this.productList[product.id].count++;
-        this.updateProduct(product);
-      } else {
-        this.productList[product.id] = {
-          title: product.title,
-          price: product.price ?? null,
-          count: 1,
-        };
-      }
+      this.productList.push(product);
     }
   }
   //удаление товара, полученного в параметре из массива корзины;
   popProduct(product: IProduct) {
-    if (this.hasProduct(product.id)) {
-      this.productList[product.id].count--;
-      if (this.productList[product.id].count < 1) {
-        delete this.productList[product.id];
-      } else {
-        this.updateProduct(product);
-      }
-    }
+    const i: number | null = this.indexProduct(product.id);
+    if (i && i >= 0) this.productList.slice(i, 1);
   }
   //очистка корзины;
   clear() {
-    this.productList = {};
+    this.productList = [];
   }
   //получение стоимости всех товаров в корзине;
   totalSum() {
-    let total = 0;
-    for (const item of Object.values(this.productList)) {
-      const price = item.price ?? 0;
-      total += (price > 0 ? price : 0) * item.count;
-    }
+    const total = this.productList.reduce((summ, prod) => {
+      const price: number = prod.price ?? 0;
+      return (summ += price > 0 ? price : 0);
+    }, 0);
     return total;
   }
   //получение количества товаров в корзине;
   totalCount() {
-    let total = 0;
-    for (const item of Object.values(this.productList)) {
-      total += item.count;
-    }
-    return total;
+    return this.productList.length;
   }
   //проверка наличия товара в корзине по его id, полученного в параметр метода.
-  hasProduct(id: string): boolean {
-    if (id === "") return false;
-    else return id in this.productList;
-  }
-  //обновление товара
-  updateProduct(product: IProduct) {
-    if (this.hasProduct(product.id)) {
-      this.productList[product.id].title = product.title;
-      this.productList[product.id].price = product.price ?? null;
-    }
+  //вернём номер позиции в массиве, если элемента нет, то вернём null.
+  indexProduct(id: TProductId): number | null {
+    if (id === "") return null;
+    else
+      return (
+        this.productList.findIndex((el: IProduct): boolean => el.id === id) ??
+        null
+      );
   }
 }

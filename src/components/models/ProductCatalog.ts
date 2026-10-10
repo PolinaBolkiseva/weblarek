@@ -1,4 +1,4 @@
-import type { IProduct, TProductList } from "../../types";
+import type { IProduct, TProductList, TProductId } from "../../types";
 
 export class ProductCatalog {
   protected productList: TProductList;
@@ -12,26 +12,19 @@ export class ProductCatalog {
   //Методы
   //сохранение массива товаров полученного в параметрах метода;
   setProductList(products: IProduct[]): void {
-    this.productList = [];
-    for (const product of products) {
-      this.productList.push(product);
-    }
+    this.productList = products;
   }
 
   //получение массива товаров из модели;
   getProductList(): TProductList {
-    return [...this.productList];
+    return this.productList;
   }
   //получение одного товара по его id;
-  getProduct(id: string): IProduct | null {
-    if (id === "") return null;
-    else
-      return (
-        this.productList.find((el: IProduct): boolean => el.id === id) ?? null
-      );
+  getProduct(id: TProductId): IProduct | null {
+    return this.productList.find((el: IProduct): boolean => el.id === id) ?? null;
   }
   //сохранение товара для подробного отображения;
-  setCurrentProduct(id: string): void {
+  setCurrentProduct(id: TProductId): void {
     this.currentProduct = this.getProduct(id);
   }
   //получение товара для подробного отображения.

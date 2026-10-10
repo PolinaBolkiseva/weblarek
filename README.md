@@ -104,10 +104,9 @@ Presenter - презентер содержит основную логику п
 
 #### Алиасы
 `ApiPostMethods` - `'POST' | 'PUT' | 'DELETE'` - методы HTTP-запроса, которые принимает post  
-`TPayment` - `'card' | 'cash' | ''` - способ оплаты; пустая строка означает, что способ не выбран  
+`TPayment` - `'card' | 'cash'` - способ оплаты  
 `TProductId` - `string` - идентификатор товара  
-`TProductList` - `IProduct[]` - массив товаров каталога  
-`TProductBasket` - объект корзины: ключ `TProductId`, значение `{ title: string; price: number | null; count: number }`  
+`TProductList` - `IProduct[]` - массив товаров; используется и в каталоге, и в корзине  
 `TErrors` - `{ [field: string]: string }` - словарь ошибок валидации: ключ - имя поля, значение - текст ошибки  
 
 Эндпоинты API заданы константами в `src/utils/constants.ts`: `PRODUCT_ENDPOINT` (`/product`), `ORDER_ENDPOINT` (`/order`).
@@ -134,7 +133,7 @@ Presenter - презентер содержит основную логику п
 Интерфейс описывает покупателя, хранит его контактные данные.
 
 Поля интерфейса:  
-`payment: TPayment` - способ оплаты  
+`payment: TPayment | null` - способ оплаты; null, если способ не выбран  
 `email: string` - E-mail покупателя  
 `phone: string` - телефон покупателя  
 `address: string` - адрес покупателя  
@@ -143,17 +142,14 @@ Presenter - презентер содержит основную логику п
 Ответ сервера на GET каталога.
 
 Поля:  
-`count: number` - количество товаров в выдаче  
+`tota: number` - количество товаров в выдаче  
 `items: TProductList` - массив товаров  
 
 #### Интерфейс IOrderRequest
-Тело POST-запроса на оформление заказа.
+Тело POST-запроса на оформление заказа. Расширяет `IBuyer`.
 
 Поля:  
-`payment: TPayment` - способ оплаты  
-`email: string` - E-mail  
-`phone: string` - телефон  
-`address: string` - адрес  
+поля `IBuyer` - `payment`, `email`, `phone`, `address`  
 `total: number` - сумма заказа  
 `items: TProductId[]` - идентификаторы товаров  
 
@@ -178,56 +174,52 @@ Presenter - презентер содержит основную логику п
 
 Методы класса:  
 `setProductList(products: IProduct[]): void` - сохраняет в модели массив товаров, полученный в параметре  
-`getProductList(): TProductList` - возвращает копию массива товаров из модели  
-`getProduct(id: string): IProduct | null` - возвращает товар по id; если id пустой или товар не найден, возвращает null  
-`setCurrentProduct(id: string): void` - сохраняет в currentProduct товар для подробного отображения, найденный по id  
+`getProductList(): TProductList` - возвращает массив товаров из модели  
+`getProduct(id: TProductId): IProduct | null` - возвращает товар по id; если товар не найден, возвращает null  
+`setCurrentProduct(id: TProductId): void` - сохраняет в currentProduct товар для подробного отображения, найденный по id  
 `getCurrentProduct(): IProduct | null` - возвращает товар, сохранённый для подробного отображения
 
 ##### Класс ProductBasket
-Хранит товары корзины: ключ - id товара, значение - название, цена и количество.
+Хранит товары корзины как массив `IProduct`.
 
 Конструктор:  
 `constructor()` - создаёт пустую корзину
 
 Поля класса:  
-`productList: TProductBasket` - объект со списком товаров в корзине
+`productList: TProductList` - массив товаров в корзине
 
 Методы класса:  
-`getProductList(): TProductBasket` - возвращает копию объекта со списком товаров, которые находятся в корзине  
-`pushProduct(product: IProduct): void` - добавляет товар в корзину; если товар уже есть, увеличивает количество и обновляет название и цену  
-`popProduct(product: IProduct): void` - уменьшает количество товара в корзине; если количество становится меньше 1, удаляет товар из корзины  
+`getProductList(): TProductList` - возвращает массив товаров, которые находятся в корзине  
+`pushProduct(product: IProduct): void` - добавляет товар в массив корзины, если id товара не пустой  
+`popProduct(product: IProduct): void` - удаляет товар из массива корзины по индексу, найденному через indexProduct  
 `clear(): void` - очищает корзину  
-`totalSum(): number` - возвращает стоимость всех товаров в корзине; цена null, 0 или отрицательная в сумму не входит  
-`totalCount(): number` - возвращает суммарное количество товаров в корзине  
-`hasProduct(id: string): boolean` - проверяет наличие товара в корзине по id; для пустой строки возвращает false  
-`updateProduct(product: IProduct): void` - обновляет название и цену товара в корзине, если товар с таким id уже есть
+`totalSum(): number` - возвращает сумму цен товаров в корзине; для цены null подставляется 0  
+`totalCount(): number` - возвращает количество товаров в корзине (длину массива)  
+`indexProduct(id: TProductId): number | null` - возвращает индекс товара в массиве по id; если id пустой, возвращает null
 
 ##### Класс Buyer
-Реализует интерфейс IBuyer. Хранит контактные данные покупателя и ошибки валидации.
+Хранит контактные данные покупателя. Поля защищённые; наружу данные отдаются через getBuyer в виде IBuyer.
 
 Конструктор:  
-`constructor(payment: TPayment, email: string, phone: string, address: string)` - принимает способ оплаты, email, телефон и адрес; errorList инициализируется пустым объектом
+`constructor()` - создаёт покупателя с пустыми строками и payment = null
 
 Поля класса:  
-`payment: TPayment` - вид оплаты  
+`payment: TPayment | null` - вид оплаты; null, если способ не выбран  
 `email: string` - E-mail покупателя  
 `phone: string` - номер телефона покупателя  
 `address: string` - адрес покупателя  
-`errorList: TErrors` - объект ошибок, ключ - имя поля, значение - текст ошибки
 
 Методы класса:  
-`setPayment(payment: TPayment): void` - записывает способ оплаты в поле payment и вызывает проверку isValidPayment  
-`setEmail(email: string): void` - записывает email в поле email и вызывает проверку isValidEmail  
-`setPhone(phone: string): void` - записывает телефон в поле phone и вызывает проверку isValidPhone  
-`setAddress(address: string): void` - записывает адрес в поле address и вызывает проверку isValidAddress  
+`setPayment(payment: TPayment): void` - записывает способ оплаты в поле payment  
+`setEmail(email: string): void` - записывает email в поле email  
+`setPhone(phone: string): void` - записывает телефон в поле phone  
+`setAddress(address: string): void` - записывает адрес в поле address  
 `getBuyer(): IBuyer` - возвращает объект с текущими данными покупателя: payment, email, phone, address  
-`getErrorList(): TErrors` - возвращает копию объекта ошибок валидации  
-`clear(): void` - очищает данные покупателя и объект ошибок errorList  
-`isValidPayment(): boolean` - проверяет, что способ оплаты не пустой; при ошибке пишет текст в errorList['payment'], при успехе удаляет эту ошибку  
-`isValidEmail(): boolean` - проверяет, что email не пустой; при ошибке пишет текст в errorList['email'], при успехе удаляет эту ошибку  
-`isValidPhone(): boolean` - проверяет, что телефон не пустой; при ошибке пишет текст в errorList['phone'], при успехе удаляет эту ошибку  
-`isValidAddress(): boolean` - проверяет, что адрес не пустой; при ошибке пишет текст в errorList['address'], при успехе удаляет эту ошибку  
-`isValid(): boolean` - запускает все четыре проверки независимо друг от друга и возвращает true, если все поля валидны 
+`clear(): void` - очищает данные покупателя: payment = null, остальные поля - пустые строки  
+`isValidPayment(): TErrors` - проверяет, что способ оплаты выбран; если payment равен null, возвращает объект с ключом payment, иначе пустой объект  
+`isValidEmail(): TErrors` - проверяет, что email не пустой; если пустой, возвращает объект с ключом email, иначе пустой объект  
+`isValidPhone(): TErrors` - проверяет, что телефон не пустой; если пустой, возвращает объект с ключом phone, иначе пустой объект  
+`isValidAddress(): TErrors` - проверяет, что адрес не пустой; если пустой, возвращает объект с ключом address, иначе пустой объект 
 
 ### Слой коммуникации
 
