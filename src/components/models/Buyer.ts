@@ -56,28 +56,28 @@ export class Buyer {
   // каждого отдельного поля, но и предоставлять информацию об ошибке,
   // связанной с проверкой конкретного значения.
   isValidPayment(): TErrors {
-    let errorObj: TErrors = {};
+    const errorObj: TErrors = {};
     if (this.payment === null)
       errorObj["payment"] = "способ оплаты не выбран";
     return errorObj;
   }
 
   isValidEmail(): TErrors {
-    let errorObj: TErrors = {};
+    const errorObj: TErrors = {};
     if (this.email === "")
       errorObj["email"] = "E-mail не указан";
     return errorObj;
   }
 
   isValidPhone(): TErrors {
-    let errorObj: TErrors = {};
+    const errorObj: TErrors = {};
     if (this.phone === "")
       errorObj["phone"] = "номер телефона не указан";
     return errorObj;
   }
 
   isValidAddress(): TErrors {
-    let errorObj: TErrors = {};
+    const errorObj: TErrors = {};
     if (this.address === "")
       errorObj["address"] = "адрес не указан";
     return errorObj;
