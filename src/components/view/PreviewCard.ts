@@ -1,0 +1,48 @@
+// src/components/views/PreviewCard.ts
+import { ensureElement } from '../../utils/utils';
+import { CatalogCard } from './CatalogCard';
+
+// Добавка подробной карточки к общим данным ICard.
+interface IPreviewExtra {
+  description: string;
+  inBasket: boolean;
+}
+
+// Обработчики действий пользователя на карточке. Карточка — динамический
+// компонент: события не эмитит, а получает готовые коллбеки через конструктор.
+interface IPreviewCardActions {
+  onBasket: () => void; // клик по кнопке корзины
+}
+
+// VIEW — подробная карточка товара. Заголовок, цену 
+// у Card, от себя добавляет описание. Только показывает данные —
+// действий пользователя у неё нет.
+export class PreviewCard extends CatalogCard <IPreviewExtra> {
+  protected descriptionElement: HTMLElement;
+  protected cardButton: HTMLButtonElement;
+
+  constructor(container: HTMLElement, actions?: IPreviewCardActions) {
+    super(container);
+
+    this.descriptionElement = ensureElement<HTMLElement>('.card__text', this.container);
+
+    this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
+
+    // Клик по кнопке → вызвать переданный обработчик.
+    if (actions?.onBasket) {
+      this.cardButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        actions.onBasket();
+      });
+    } 
+  }
+
+  // Сеттер protected: снаружи компонент обновляется только через render().
+  protected set description(value: string) {
+    this.descriptionElement.textContent = value;
+  }
+
+  protected set inBasket(value: boolean) {
+    this.cardButton.textContent = value ? 'Удалить из корзины' : 'В корзину';
+  }
+}

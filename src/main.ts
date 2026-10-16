@@ -9,11 +9,19 @@ import { ProductBasket } from "./components/models/ProductBasket";
 
 import { Catalog } from "./components/view/Catalog";
 import { CatalogCard } from "./components/view/CatalogCard";
+import { PreviewCard } from "./components/view/PreviewCard";
+import { Modal } from './components/view/Modal';
+
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter } from './components/base/Events';
+import { IProduct } from './types' 
 
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
+
+function productInBasket(id: string): boolean {
+  return (basket.indexProduct(id) ?? -1) >= 0;
+}
 
 /*
 console.log("--- Покупатель ---");
@@ -79,6 +87,14 @@ if (firstLocal) {
 // Единственный брокер на всё приложение.
 const events = new EventEmitter();
 
+// Модалка живёт в статичной разметке страницы.
+const modal = new Modal(ensureElement<HTMLElement>('#modal-container'));
+
+// Подробную карточку тоже создаём один раз — статичный компонент.
+const preview = new PreviewCard(cloneTemplate<HTMLElement>('#card-preview'), {
+  onBasket: () => events.emit('card:basket'),
+});
+
 // Модели данных
 const buyer = new Buyer(events);
 const catalog = new ProductCatalog(events);
@@ -99,6 +115,7 @@ larekApi
     // -----
     // Каталог изменился → забрать товары у модели и перерисовать карточки.
     events.on('catalog:changed', () => {
+      console.log("Каталог после ответа сервера:", catalog.getProductList());
       const cards = catalog.getProductList().map((item) =>
         new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog'), {
           // Клик по телу карточки: сообщаем факт — какой товар выбрали.
@@ -114,7 +131,38 @@ larekApi
       viewCatalog.render({ items: cards });
     });
 
-    console.log("Каталог после ответа сервера:", catalog.getProductList());
+    // Выбрали товар → показать подробную карточку в модалке.
+    events.on('card:selected', (item: IProduct) => {
+      modal.render({
+        content: preview.render({
+          title: item.title,
+          description: item.description,
+          price: item.price,
+          image: item.image,
+          category: item.category,
+          inBasket: productInBasket(item.id), 
+        }),
+      });
+    });
+
+    //по клику добавляем в корзину / удаляем из корзины
+    events.on('card:basket', () => {
+      const product = catalog.getCurrentProduct();
+      if (!product) return;
+      if (productInBasket(product.id)) {
+        basket.popProduct(product);
+      } else {
+        basket.pushProduct(product);
+      }
+    });
+
+    events.on('basket:changed', () => {
+      const product = catalog.getCurrentProduct();
+      if (!product) return;
+      preview.render({ inBasket: productInBasket(product.id) });
+    });
+
+
     catalog.setProductList(data.items);
   })
   .catch((error) => {
