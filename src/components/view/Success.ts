@@ -1,5 +1,5 @@
-import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
+import { Component } from "../base/Component";
+import { ensureElement } from "../../utils/utils";
 
 interface ISuccess {
   total: number;
@@ -17,16 +17,16 @@ export class Success extends Component<ISuccess> {
     super(container);
 
     this.descriptionElement = ensureElement<HTMLElement>(
-      '.order-success__description',
-      this.container
+      ".order-success__description",
+      this.container,
     );
     this.closeButton = ensureElement<HTMLButtonElement>(
-      '.order-success__close',
-      this.container
+      ".order-success__close",
+      this.container,
     );
 
     if (actions?.onClick) {
-      this.closeButton.addEventListener('click', actions.onClick);
+      this.closeButton.addEventListener("click", actions.onClick);
     }
   }
 

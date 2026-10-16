@@ -1,5 +1,5 @@
-import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
+import { Component } from "../base/Component";
+import { ensureElement } from "../../utils/utils";
 
 export interface IForm {
   valid: boolean;
@@ -17,10 +17,16 @@ export class Form<T = object> extends Component<IForm & T> {
   constructor(container: HTMLFormElement, actions?: IFormActions) {
     super(container);
 
-    this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
-    this.errorsElement = ensureElement<HTMLElement>('.form__errors', this.container);
+    this.submitButton = ensureElement<HTMLButtonElement>(
+      'button[type="submit"]',
+      this.container,
+    );
+    this.errorsElement = ensureElement<HTMLElement>(
+      ".form__errors",
+      this.container,
+    );
 
-    this.container.addEventListener('submit', (event) => {
+    this.container.addEventListener("submit", (event) => {
       event.preventDefault();
       actions?.onSubmit?.();
     });

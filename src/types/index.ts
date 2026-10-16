@@ -26,7 +26,7 @@ export interface IProduct {
 }
 
 export interface IBuyer {
-  payment: TPayment|null;
+  payment: TPayment | null;
   email: string;
   phone: string;
   address: string;
@@ -37,10 +37,10 @@ export interface IProductListResponse {
   items: TProductList;
 }
 
-export interface IOrderRequest extends IBuyer{
-    total: number; 
-    items: TProductId[]; 
-}  
+export interface IOrderRequest extends IBuyer {
+  total: number;
+  items: TProductId[];
+}
 
 export interface IOrderResponse {
   id: string;

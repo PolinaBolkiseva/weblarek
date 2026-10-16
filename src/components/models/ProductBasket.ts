@@ -1,10 +1,10 @@
 import type { IProduct, TProductId, TProductList } from "../../types";
-import type { IEvents } from '../base/Events';
+import type { IEvents } from "../base/Events";
 
 export class ProductBasket {
   protected productList: TProductList = [];
 
-  constructor (protected events: IEvents) {};
+  constructor(protected events: IEvents) {}
   //Методы
   //получение массива со списком товаров, которые находятся в корзине;
   getProductList(): TProductList {
@@ -15,18 +15,18 @@ export class ProductBasket {
     if (product.id !== "") {
       this.productList.push(product);
     }
-    this.events.emit('basket:changed');
+    this.events.emit("basket:changed");
   }
   //удаление товара, полученного в параметре из массива корзины;
   popProduct(product: IProduct) {
     const i: number | null = this.indexProduct(product.id);
-    if (i!=null && i >= 0) this.productList.splice(i, 1);
-    this.events.emit('basket:changed');
+    if (i != null && i >= 0) this.productList.splice(i, 1);
+    this.events.emit("basket:changed");
   }
   //очистка корзины;
   clear() {
     this.productList = [];
-    this.events.emit('basket:changed');
+    this.events.emit("basket:changed");
   }
   //получение стоимости всех товаров в корзине;
   totalSum() {
@@ -44,7 +44,9 @@ export class ProductBasket {
   //вернём номер позиции в массиве, если элемента нет, то вернём null.
   indexProduct(id: TProductId): number | null {
     if (id === "") return null;
-    const i = this.productList.findIndex((el: IProduct): boolean => el.id === id);
+    const i = this.productList.findIndex(
+      (el: IProduct): boolean => el.id === id,
+    );
     return i >= 0 ? i : null;
   }
 }

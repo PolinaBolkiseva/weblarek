@@ -1,5 +1,5 @@
 // src/components/view/Catalog.ts
-import { Component } from '../base/Component';
+import { Component } from "../base/Component";
 
 // Данные каталога — готовые DOM-элементы карточек.
 interface ICatalog {

@@ -1,6 +1,6 @@
-import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
-import { Catalog } from './Catalog';
+import { Component } from "../base/Component";
+import { ensureElement } from "../../utils/utils";
+import { Catalog } from "./Catalog";
 
 interface IBasketView {
   items: HTMLElement[];
@@ -21,13 +21,24 @@ export class Basket extends Component<IBasketView> {
   constructor(container: HTMLElement, actions?: IBasketActions) {
     super(container);
 
-    this.list = new Catalog(ensureElement<HTMLElement>('.basket__list', this.container));
-    this.titleElement = ensureElement<HTMLElement>('.modal__title', this.container);
-    this.totalElement = ensureElement<HTMLElement>('.basket__price', this.container);
-    this.checkoutButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
+    this.list = new Catalog(
+      ensureElement<HTMLElement>(".basket__list", this.container),
+    );
+    this.titleElement = ensureElement<HTMLElement>(
+      ".modal__title",
+      this.container,
+    );
+    this.totalElement = ensureElement<HTMLElement>(
+      ".basket__price",
+      this.container,
+    );
+    this.checkoutButton = ensureElement<HTMLButtonElement>(
+      ".basket__button",
+      this.container,
+    );
 
     if (actions?.onClick) {
-      this.checkoutButton.addEventListener('click', actions.onClick);
+      this.checkoutButton.addEventListener("click", actions.onClick);
     }
   }
 
@@ -37,10 +48,11 @@ export class Basket extends Component<IBasketView> {
   }
 
   protected set title(value: string) {
-    this.titleElement.textContent = value === '' ? 'Корзина' : value;
+    this.titleElement.textContent = value === "" ? "Корзина" : value;
   }
 
   protected set total(value: number | null) {
-    this.totalElement.textContent = value !== null ? `${value} синапсов` : `0 синапсов`;
+    this.totalElement.textContent =
+      value !== null ? `${value} синапсов` : `0 синапсов`;
   }
 }

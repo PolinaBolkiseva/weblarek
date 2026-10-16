@@ -1,5 +1,5 @@
-import { ensureElement } from '../../utils/utils';
-import { Card } from './Card';
+import { ensureElement } from "../../utils/utils";
+import { Card } from "./Card";
 
 interface IBasketCardExtra {
   index: number;
@@ -16,11 +16,17 @@ export class BasketCard extends Card<IBasketCardExtra> {
   constructor(container: HTMLElement, actions?: IBasketCardActions) {
     super(container);
 
-    this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
-    this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
+    this.indexElement = ensureElement<HTMLElement>(
+      ".basket__item-index",
+      this.container,
+    );
+    this.deleteButton = ensureElement<HTMLButtonElement>(
+      ".basket__item-delete",
+      this.container,
+    );
 
     if (actions?.onClick) {
-      this.deleteButton.addEventListener('click', actions.onClick);
+      this.deleteButton.addEventListener("click", actions.onClick);
     }
   }
 

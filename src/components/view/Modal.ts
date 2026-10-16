@@ -1,6 +1,6 @@
 // src/components/view/Modal.ts
-import { Component } from '../base/Component';
-import { ensureElement } from '../../utils/utils';
+import { Component } from "../base/Component";
+import { ensureElement } from "../../utils/utils";
 
 // Данные модалки — готовый DOM-элемент, который нужно показать.
 interface IModalData {
@@ -18,13 +18,24 @@ export class Modal extends Component<IModalData> {
   constructor(container: HTMLElement) {
     super(container);
 
-    this.closeButtonElement = ensureElement<HTMLButtonElement>('.modal__close', this.container);
-    this.contentElement = ensureElement<HTMLElement>('.modal__content', this.container);
-    this.windowElement = ensureElement<HTMLElement>('.modal__container', this.container);
+    this.closeButtonElement = ensureElement<HTMLButtonElement>(
+      ".modal__close",
+      this.container,
+    );
+    this.contentElement = ensureElement<HTMLElement>(
+      ".modal__content",
+      this.container,
+    );
+    this.windowElement = ensureElement<HTMLElement>(
+      ".modal__container",
+      this.container,
+    );
 
-    this.closeButtonElement.addEventListener('click', this.close.bind(this));
-    this.container.addEventListener('click', this.close.bind(this));
-    this.windowElement.addEventListener('click', (event) => event.stopPropagation());
+    this.closeButtonElement.addEventListener("click", this.close.bind(this));
+    this.container.addEventListener("click", this.close.bind(this));
+    this.windowElement.addEventListener("click", (event) =>
+      event.stopPropagation(),
+    );
   }
 
   // Сеттер protected: снаружи компонент обновляется только через render().
@@ -33,11 +44,11 @@ export class Modal extends Component<IModalData> {
   }
 
   open(): void {
-    this.container.classList.add('modal_active');
+    this.container.classList.add("modal_active");
   }
 
   close(): void {
-    this.container.classList.remove('modal_active');
+    this.container.classList.remove("modal_active");
     this.contentElement.replaceChildren();
   }
 

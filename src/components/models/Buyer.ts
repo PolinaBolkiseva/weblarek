@@ -1,17 +1,17 @@
 import type { TPayment, IBuyer, TErrors } from "../../types";
-import type { IEvents } from '../base/Events';
+import type { IEvents } from "../base/Events";
 
 export class Buyer {
-  protected payment: TPayment|null;
+  protected payment: TPayment | null;
   protected email: string;
   protected phone: string;
   protected address: string;
 
-  constructor (protected events: IEvents) {
+  constructor(protected events: IEvents) {
     this.payment = null;
-    this.email = '';
-    this.phone = '';
-    this.address = '';
+    this.email = "";
+    this.phone = "";
+    this.address = "";
   }
 
   //Методы
@@ -21,22 +21,22 @@ export class Buyer {
   //  которые уже могут храниться в классе;
   setPayment(payment: TPayment): void {
     this.payment = payment;
-    this.events.emit('buyer:changed');
+    this.events.emit("buyer:changed");
   }
 
   setEmail(email: string): void {
     this.email = email;
-    this.events.emit('buyer:changed');
+    this.events.emit("buyer:changed");
   }
 
   setPhone(phone: string): void {
     this.phone = phone;
-    this.events.emit('buyer:changed');
+    this.events.emit("buyer:changed");
   }
 
   setAddress(address: string): void {
     this.address = address;
-    this.events.emit('buyer:changed');
+    this.events.emit("buyer:changed");
   }
   //получение всех данных покупателя;
   getBuyer(): IBuyer {
@@ -54,7 +54,7 @@ export class Buyer {
     this.email = "";
     this.phone = "";
     this.address = "";
-    this.events.emit('buyer:changed');
+    this.events.emit("buyer:changed");
   }
   //валидация данных. Обратите внимание, что правила валидации описаны
   // в функциональных требованиях. Поле является валидным, если оно не пустое.
@@ -63,15 +63,13 @@ export class Buyer {
   // связанной с проверкой конкретного значения.
   isValidPayment(): TErrors {
     const errorObj: TErrors = {};
-    if (this.payment === null)
-      errorObj["payment"] = "способ оплаты не выбран";
+    if (this.payment === null) errorObj["payment"] = "способ оплаты не выбран";
     return errorObj;
   }
 
   isValidEmail(): TErrors {
     const errorObj: TErrors = {};
-    if (this.email.trim() === "")
-      errorObj["email"] = "E-mail не указан";
+    if (this.email.trim() === "") errorObj["email"] = "E-mail не указан";
     return errorObj;
   }
 
@@ -84,8 +82,7 @@ export class Buyer {
 
   isValidAddress(): TErrors {
     const errorObj: TErrors = {};
-    if (this.address.trim() === "")
-      errorObj["address"] = "адрес не указан";
+    if (this.address.trim() === "") errorObj["address"] = "адрес не указан";
     return errorObj;
   }
 }

@@ -9,17 +9,17 @@ import { ProductBasket } from "./components/models/ProductBasket";
 import { Catalog } from "./components/view/Catalog";
 import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
-import { Basket } from './components/view/Basket';
-import { BasketCard } from './components/view/BasketCard';
-import { Order } from './components/view/Order';
-import { Contacts } from './components/view/Contacts';
-import { Success } from './components/view/Success';
-import { Modal } from './components/view/Modal';
-import { Header } from './components/view/Header'
+import { Basket } from "./components/view/Basket";
+import { BasketCard } from "./components/view/BasketCard";
+import { Order } from "./components/view/Order";
+import { Contacts } from "./components/view/Contacts";
+import { Success } from "./components/view/Success";
+import { Modal } from "./components/view/Modal";
+import { Header } from "./components/view/Header";
 
-import { cloneTemplate, ensureElement } from './utils/utils';
-import { EventEmitter } from './components/base/Events';
-import { IProduct, TErrors, TPayment } from './types' 
+import { cloneTemplate, ensureElement } from "./utils/utils";
+import { EventEmitter } from "./components/base/Events";
+import { IProduct, TErrors, TPayment } from "./types";
 
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
@@ -28,11 +28,14 @@ function productInBasket(id: string): boolean {
   return basket.indexProduct(id) != null;
 }
 
-function collectErrors(...parts: TErrors[]): { valid: boolean; errors: string } {
+function collectErrors(...parts: TErrors[]): {
+  valid: boolean;
+  errors: string;
+} {
   const merged: TErrors = Object.assign({}, ...parts);
   return {
     valid: Object.keys(merged).length === 0,
-    errors: Object.values(merged).join('; '),
+    errors: Object.values(merged).join("; "),
   };
 }
 
@@ -42,38 +45,38 @@ function collectErrors(...parts: TErrors[]): { valid: boolean; errors: string } 
 const events = new EventEmitter();
 
 // Модалка живёт в статичной разметке страницы.
-const modal = new Modal(ensureElement<HTMLElement>('#modal-container'));
+const modal = new Modal(ensureElement<HTMLElement>("#modal-container"));
 
 // Шапочка
-const header = new Header(ensureElement<HTMLElement>('.header__container'), {
-  onClick: () => events.emit('basket:open'),
+const header = new Header(ensureElement<HTMLElement>(".header__container"), {
+  onClick: () => events.emit("basket:open"),
 });
 
 // Корзина
-const viewBasket = new Basket(cloneTemplate<HTMLElement>('#basket'), {
-  onClick: () => events.emit('basket:order'),
+const viewBasket = new Basket(cloneTemplate<HTMLElement>("#basket"), {
+  onClick: () => events.emit("basket:order"),
 });
 
 // Оформление заказа
-const viewOrder = new Order(cloneTemplate<HTMLFormElement>('#order'), {
-  onChange: (data) => events.emit('order:changed', data),
-  onSubmit: () => events.emit('order:submit'),
+const viewOrder = new Order(cloneTemplate<HTMLFormElement>("#order"), {
+  onChange: (data) => events.emit("order:changed", data),
+  onSubmit: () => events.emit("order:submit"),
 });
 
 // Форма с контактами
-const viewContacts = new Contacts(cloneTemplate<HTMLFormElement>('#contacts'), {
-  onChange: (data) => events.emit('contacts:changed', data),
-  onSubmit: () => events.emit('contacts:submit'),
+const viewContacts = new Contacts(cloneTemplate<HTMLFormElement>("#contacts"), {
+  onChange: (data) => events.emit("contacts:changed", data),
+  onSubmit: () => events.emit("contacts:submit"),
 });
 
 // Заказ оплачен
-const viewSuccess = new Success(cloneTemplate<HTMLElement>('#success'), {
+const viewSuccess = new Success(cloneTemplate<HTMLElement>("#success"), {
   onClick: () => modal.close(),
 });
 
 // Подробную карточку тоже создаём один раз — статичный компонент.
-const preview = new PreviewCard(cloneTemplate<HTMLElement>('#card-preview'), {
-  onClick: () => events.emit('card:basket'),
+const preview = new PreviewCard(cloneTemplate<HTMLElement>("#card-preview"), {
+  onClick: () => events.emit("card:basket"),
 });
 
 // Модели данных
@@ -82,17 +85,17 @@ const catalog = new ProductCatalog(events);
 const basket = new ProductBasket(events);
 
 // Каталог живёт в статичной разметке страницы.
-const viewCatalog = new Catalog(ensureElement<HTMLElement>('.gallery'));
+const viewCatalog = new Catalog(ensureElement<HTMLElement>(".gallery"));
 
 function renderBasket() {
   const items = basket.getProductList().map((item, index) =>
-    new BasketCard(cloneTemplate<HTMLElement>('#card-basket'), {
-      onClick: () => events.emit('basket:remove', item),
+    new BasketCard(cloneTemplate<HTMLElement>("#card-basket"), {
+      onClick: () => events.emit("basket:remove", item),
     }).render({
       title: item.title,
       price: item.price,
       index: index + 1,
-    })
+    }),
   );
 
   return viewBasket.render({
@@ -123,36 +126,42 @@ function renderContacts() {
   });
 }
 
-events.on('basket:open', () => {
+events.on("basket:open", () => {
   modal.render({ content: renderBasket() });
 });
 
-events.on('basket:order', () => {
+events.on("basket:order", () => {
   modal.render({ content: renderOrder() });
 });
 
-events.on('order:changed', ({ field, value }: { field: string; value: string }) => {
-  if (field === 'payment') buyer.setPayment(value as TPayment);
-  if (field === 'address') buyer.setAddress(value);
-});
+events.on(
+  "order:changed",
+  ({ field, value }: { field: string; value: string }) => {
+    if (field === "payment") buyer.setPayment(value as TPayment);
+    if (field === "address") buyer.setAddress(value);
+  },
+);
 
-events.on('order:submit', () => {
+events.on("order:submit", () => {
   const status = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
   if (!status.valid) return;
   modal.render({ content: renderContacts() });
 });
 
-events.on('contacts:changed', ({ field, value }: { field: string; value: string }) => {
-  if (field === 'email') buyer.setEmail(value);
-  if (field === 'phone') buyer.setPhone(value);
-});
+events.on(
+  "contacts:changed",
+  ({ field, value }: { field: string; value: string }) => {
+    if (field === "email") buyer.setEmail(value);
+    if (field === "phone") buyer.setPhone(value);
+  },
+);
 
-events.on('contacts:submit', () => {
+events.on("contacts:submit", () => {
   const status = collectErrors(
     buyer.isValidPayment(),
     buyer.isValidAddress(),
     buyer.isValidEmail(),
-    buyer.isValidPhone()
+    buyer.isValidPhone(),
   );
   if (!status.valid) return;
 
@@ -179,43 +188,49 @@ events.on('contacts:submit', () => {
     });
 });
 
-events.on('buyer:changed', () => {
-  const orderStatus = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
+events.on("buyer:changed", () => {
+  const orderStatus = collectErrors(
+    buyer.isValidPayment(),
+    buyer.isValidAddress(),
+  );
   viewOrder.render({
     payment: buyer.getBuyer().payment,
     valid: orderStatus.valid,
     errors: orderStatus.errors,
   });
 
-  const contactStatus = collectErrors(buyer.isValidEmail(), buyer.isValidPhone());
+  const contactStatus = collectErrors(
+    buyer.isValidEmail(),
+    buyer.isValidPhone(),
+  );
   viewContacts.render({
     valid: contactStatus.valid,
     errors: contactStatus.errors,
   });
 });
 
-events.on('basket:remove', (item: IProduct) => {
+events.on("basket:remove", (item: IProduct) => {
   basket.popProduct(item);
 });
 
 // Каталог изменился → забрать товары у модели и перерисовать карточки.
-events.on('catalog:changed', () => {
+events.on("catalog:changed", () => {
   const cards = catalog.getProductList().map((item) =>
-    new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog'), {
+    new CatalogCard(cloneTemplate<HTMLElement>("#card-catalog"), {
       // Клик по телу карточки: сообщаем факт — какой товар выбрали.
-      onClick: () => events.emit('card:selected', item),
+      onClick: () => events.emit("card:selected", item),
     }).render({
       title: item.title,
       price: item.price,
       category: item.category,
-      image: item.image
-    })
+      image: item.image,
+    }),
   );
 
   viewCatalog.render({ items: cards });
 });
 
-events.on('basket:changed', () => {
+events.on("basket:changed", () => {
   header.render({ counter: basket.totalCount() });
 
   const product = catalog.getCurrentProduct();
@@ -227,7 +242,7 @@ events.on('basket:changed', () => {
 });
 
 // Выбрали товар → показать подробную карточку в модалке.
-events.on('card:selected', (item: IProduct) => {
+events.on("card:selected", (item: IProduct) => {
   catalog.setCurrentProduct(item.id);
   modal.render({
     content: preview.render({
@@ -242,7 +257,7 @@ events.on('card:selected', (item: IProduct) => {
 });
 
 //по клику добавляем в корзину / удаляем из корзины
-events.on('card:basket', () => {
+events.on("card:basket", () => {
   const product = catalog.getCurrentProduct();
   if (!product || product.price === null) return;
   if (productInBasket(product.id)) {
