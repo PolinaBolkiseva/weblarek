@@ -1,10 +1,11 @@
 import type { IProduct, TProductList, TProductId } from "../../types";
+import type { IEvents } from '../base/Events';
 
 export class ProductCatalog {
   protected productList: TProductList;
   protected currentProduct: IProduct | null;
 
-  constructor() {
+  constructor(protected events: IEvents) {
     this.productList = [];
     this.currentProduct = null;
   }
@@ -13,6 +14,7 @@ export class ProductCatalog {
   //сохранение массива товаров полученного в параметрах метода;
   setProductList(products: IProduct[]): void {
     this.productList = products;
+    this.events.emit('catalog:changed');
   }
 
   //получение массива товаров из модели;
@@ -26,6 +28,7 @@ export class ProductCatalog {
   //сохранение товара для подробного отображения;
   setCurrentProduct(id: TProductId): void {
     this.currentProduct = this.getProduct(id);
+    this.events.emit('currentProduct:changed');
   }
   //получение товара для подробного отображения.
   getCurrentProduct(): IProduct | null {

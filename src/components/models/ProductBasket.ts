@@ -1,8 +1,10 @@
 import type { IProduct, TProductId, TProductList } from "../../types";
+import type { IEvents } from '../base/Events';
 
 export class ProductBasket {
   protected productList: TProductList = [];
 
+  constructor (protected events: IEvents) {};
   //Методы
   //получение массива со списком товаров, которые находятся в корзине;
   getProductList(): TProductList {
@@ -13,15 +15,18 @@ export class ProductBasket {
     if (product.id !== "") {
       this.productList.push(product);
     }
+    this.events.emit('basket:changed');
   }
   //удаление товара, полученного в параметре из массива корзины;
   popProduct(product: IProduct) {
     const i: number | null = this.indexProduct(product.id);
     if (i && i >= 0) this.productList.slice(i, 1);
+    this.events.emit('basket:changed');
   }
   //очистка корзины;
   clear() {
     this.productList = [];
+    this.events.emit('basket:changed');
   }
   //получение стоимости всех товаров в корзине;
   totalSum() {

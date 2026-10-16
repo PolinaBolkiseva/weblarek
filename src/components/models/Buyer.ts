@@ -1,4 +1,5 @@
 import type { TPayment, IBuyer, TErrors } from "../../types";
+import type { IEvents } from '../base/Events';
 
 export class Buyer {
   protected payment: TPayment|null;
@@ -6,7 +7,7 @@ export class Buyer {
   protected phone: string;
   protected address: string;
 
-  constructor() {
+  constructor (protected events: IEvents) {
     this.payment = null;
     this.email = '';
     this.phone = '';
@@ -20,18 +21,22 @@ export class Buyer {
   //  которые уже могут храниться в классе;
   setPayment(payment: TPayment): void {
     this.payment = payment;
+    this.events.emit('buyer:changed');
   }
 
   setEmail(email: string): void {
     this.email = email;
+    this.events.emit('buyer:changed');
   }
 
   setPhone(phone: string): void {
     this.phone = phone;
+    this.events.emit('buyer:changed');
   }
 
   setAddress(address: string): void {
     this.address = address;
+    this.events.emit('buyer:changed');
   }
   //получение всех данных покупателя;
   getBuyer(): IBuyer {
@@ -49,6 +54,7 @@ export class Buyer {
     this.email = "";
     this.phone = "";
     this.address = "";
+    this.events.emit('buyer:changed');
   }
   //валидация данных. Обратите внимание, что правила валидации описаны
   // в функциональных требованиях. Поле является валидным, если оно не пустое.
