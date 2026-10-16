@@ -7,6 +7,10 @@ import { Buyer } from "./components/models/Buyer";
 import { ProductCatalog } from "./components/models/ProductCatalog";
 import { ProductBasket } from "./components/models/ProductBasket";
 
+import { Catalog } from "./components/view/Catalog";
+import { CatalogCard } from "./components/view/CatalogCard";
+import { cloneTemplate, ensureElement } from './utils/utils';
+
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 const buyer = new Buyer();
@@ -81,3 +85,12 @@ larekApi
   .catch((error) => {
     console.error("Ошибка запроса каталога:", error);
   });
+
+//------------------------------------9й спринт-----------------------------------------------
+// Каталог живёт в статичной разметке страницы.
+const viewCatalog = new Catalog(ensureElement<HTMLElement>('.gallery'));
+
+const cards = catalog.getProductList().map((data) =>
+  new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog')).render(data)
+);
+viewCatalog.render({ items: cards});
