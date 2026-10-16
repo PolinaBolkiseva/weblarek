@@ -1,4 +1,4 @@
-// src/components/views/PreviewCard.ts
+// src/components/view/PreviewCard.ts
 import { ensureElement } from '../../utils/utils';
 import { CatalogCard } from './CatalogCard';
 
@@ -8,15 +8,14 @@ interface IPreviewExtra {
   inBasket: boolean;
 }
 
-// Обработчики действий пользователя на карточке. Карточка — динамический
-// компонент: события не эмитит, а получает готовые коллбеки через конструктор.
+// Карточка просмотра — статичный элемент: события не эмитит,
+// а получает готовые коллбеки через конструктор.
 interface IPreviewCardActions {
   onClick: () => void; // клик по кнопке корзины
 }
 
 // VIEW — подробная карточка товара. Заголовок, цену 
-// у Card, от себя добавляет описание. Только показывает данные —
-// действий пользователя у неё нет.
+// у Card, от себя добавляет описание.
 export class PreviewCard extends CatalogCard <IPreviewExtra> {
   protected descriptionElement: HTMLElement;
   protected cardButton: HTMLButtonElement;

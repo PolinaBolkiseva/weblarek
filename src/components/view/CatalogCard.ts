@@ -1,9 +1,8 @@
-// src/components/views/CatalogCard.ts
+// src/components/view/CatalogCard.ts
 import { ensureElement } from '../../utils/utils';
 import { CDN_URL, categoryMap } from '../../utils/constants'
 import { Card } from './Card';
 
-// Общие данные любой карточки товара.
 export interface ICatalogExtra {
   image: string;
   category: string;
@@ -14,8 +13,7 @@ export interface ICatalogExtra {
 interface ICatalogCardActions {
   onClick: () => void; // клик по телу карточки — подробности
 }
-// VIEW — карточка товара в списке. Заголовок, цену и остаток наследует
-// у Card, от себя добавляет кнопку «Поступление товара».
+// VIEW — карточка товара в списке. Наследует заголовок и цену, добавляет картинку и категорию.
 export class CatalogCard<T = object> extends Card<ICatalogExtra&T>{
   protected imageElement: HTMLImageElement;
   protected categoryElement: HTMLElement;

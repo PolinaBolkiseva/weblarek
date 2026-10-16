@@ -1,4 +1,4 @@
-// src/components/views/Card.ts
+// src/components/view/Card.ts
 import { ensureElement } from '../../utils/utils';
 import { Component } from '../base/Component';
 

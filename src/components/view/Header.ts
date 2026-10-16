@@ -6,7 +6,7 @@ interface IBasket {
 }
 
 interface IBasketAction {
-  onClick: () => void; // клик по телу карточки — подробности
+  onClick: () => void;
 }
 
 export class Header extends Component<IBasket> {

@@ -44,10 +44,7 @@ export class ProductBasket {
   //вернём номер позиции в массиве, если элемента нет, то вернём null.
   indexProduct(id: TProductId): number | null {
     if (id === "") return null;
-    else
-      return (
-        this.productList.findIndex((el: IProduct): boolean => el.id === id) ??
-        null
-      );
+    const i = this.productList.findIndex((el: IProduct): boolean => el.id === id);
+    return i >= 0 ? i : null;
   }
 }

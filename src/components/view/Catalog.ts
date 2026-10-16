@@ -1,4 +1,4 @@
-// src/components/views/Catalog.ts
+// src/components/view/Catalog.ts
 import { Component } from '../base/Component';
 
 // Данные каталога — готовые DOM-элементы карточек.

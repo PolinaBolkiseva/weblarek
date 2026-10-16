@@ -12,18 +12,29 @@ import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
 import { Basket } from './components/view/Basket';
 import { BasketCard } from './components/view/BasketCard';
+import { Order } from './components/view/Order';
+import { Contacts } from './components/view/Contacts';
+import { Success } from './components/view/Success';
 import { Modal } from './components/view/Modal';
 import { Header } from './components/view/Header'
 
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter } from './components/base/Events';
-import { IProduct } from './types' 
+import { IProduct, TErrors, TPayment } from './types' 
 
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 
 function productInBasket(id: string): boolean {
-  return (basket.indexProduct(id) ?? -1) >= 0;
+  return basket.indexProduct(id) != null;
+}
+
+function collectErrors(...parts: TErrors[]): { valid: boolean; errors: string } {
+  const merged: TErrors = Object.assign({}, ...parts);
+  return {
+    valid: Object.keys(merged).length === 0,
+    errors: Object.values(merged).join('; '),
+  };
 }
 
 /*
@@ -98,8 +109,26 @@ const header = new Header(ensureElement<HTMLElement>('.header__container'), {
   onClick: () => events.emit('basket:open'),
 });
 
+// Корзина
 const viewBasket = new Basket(cloneTemplate<HTMLElement>('#basket'), {
   onClick: () => events.emit('basket:order'),
+});
+
+// Оформление заказа
+const viewOrder = new Order(cloneTemplate<HTMLFormElement>('#order'), {
+  onChange: (data) => events.emit('order:changed', data),
+  onSubmit: () => events.emit('order:submit'),
+});
+
+// Форма с контактами
+const viewContacts = new Contacts(cloneTemplate<HTMLFormElement>('#contacts'), {
+  onChange: (data) => events.emit('contacts:changed', data),
+  onSubmit: () => events.emit('contacts:submit'),
+});
+
+// Заказ оплачен
+const viewSuccess = new Success(cloneTemplate<HTMLElement>('#success'), {
+  onClick: () => modal.close(),
 });
 
 // Подробную карточку тоже создаём один раз — статичный компонент.
@@ -135,8 +164,97 @@ function renderBasket() {
   });
 }
 
+function renderOrder() {
+  const data = buyer.getBuyer();
+  const status = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
+  return viewOrder.render({
+    payment: data.payment,
+    address: data.address,
+    valid: status.valid,
+    errors: status.errors,
+  });
+}
+
+function renderContacts() {
+  const data = buyer.getBuyer();
+  const status = collectErrors(buyer.isValidEmail(), buyer.isValidPhone());
+  return viewContacts.render({
+    email: data.email,
+    phone: data.phone,
+    valid: status.valid,
+    errors: status.errors,
+  });
+}
+
 events.on('basket:open', () => {
   modal.render({ content: renderBasket() });
+});
+
+events.on('basket:order', () => {
+  modal.render({ content: renderOrder() });
+});
+
+events.on('order:changed', ({ field, value }: { field: string; value: string }) => {
+  if (field === 'payment') buyer.setPayment(value as TPayment);
+  if (field === 'address') buyer.setAddress(value);
+});
+
+events.on('order:submit', () => {
+  const status = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
+  if (!status.valid) return;
+  modal.render({ content: renderContacts() });
+});
+
+events.on('contacts:changed', ({ field, value }: { field: string; value: string }) => {
+  if (field === 'email') buyer.setEmail(value);
+  if (field === 'phone') buyer.setPhone(value);
+});
+
+events.on('contacts:submit', () => {
+  const status = collectErrors(
+    buyer.isValidPayment(),
+    buyer.isValidAddress(),
+    buyer.isValidEmail(),
+    buyer.isValidPhone()
+  );
+  if (!status.valid) return;
+
+  const data = buyer.getBuyer();
+  if (data.payment === null) return;
+
+  larekApi
+    .createOrder({
+      payment: data.payment,
+      email: data.email,
+      phone: data.phone,
+      address: data.address,
+      total: basket.totalSum(),
+      items: basket.getProductList().map((item) => item.id),
+    })
+    .then((result) => {
+      const total = result.total;
+      basket.clear();
+      buyer.clear();
+      modal.render({ content: viewSuccess.render({ total }) });
+    })
+    .catch((error) => {
+      viewContacts.render({ errors: String(error), valid: false });
+    });
+});
+
+events.on('buyer:changed', () => {
+  const orderStatus = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
+  viewOrder.render({
+    payment: buyer.getBuyer().payment,
+    valid: orderStatus.valid,
+    errors: orderStatus.errors,
+  });
+
+  const contactStatus = collectErrors(buyer.isValidEmail(), buyer.isValidPhone());
+  viewContacts.render({
+    valid: contactStatus.valid,
+    errors: contactStatus.errors,
+  });
 });
 
 events.on('basket:remove', (item: IProduct) => {

@@ -1,4 +1,4 @@
-// src/components/views/ReceiptForm.ts
+// src/components/view/ReceiptForm.ts
 import { ensureAllElements, ensureElement } from '../../utils/utils';
 import { Component } from '../base/Component';
 import type { IEvents } from '../base/Events';
@@ -39,7 +39,6 @@ export class ReceiptForm extends Component<IReceiptForm> {
     this.errorsElement = ensureElement<HTMLElement>('.receipt__errors', this.container);
 
     // Кнопки-переключатели: при клике View только сообщает о выборе.
-    // Активный класс выставит сеттер reason ПОСЛЕ сохранения в модели.
     this.reasonButtons.forEach((button) => {
       button.addEventListener('click', () => {
         this.events.emit('form:changed', { field: 'reason', value: button.name });
