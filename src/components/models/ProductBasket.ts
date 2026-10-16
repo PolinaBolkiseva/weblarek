@@ -20,7 +20,7 @@ export class ProductBasket {
   //удаление товара, полученного в параметре из массива корзины;
   popProduct(product: IProduct) {
     const i: number | null = this.indexProduct(product.id);
-    if (i && i >= 0) this.productList.slice(i, 1);
+    if (i!=null && i >= 0) this.productList.splice(i, 1);
     this.events.emit('basket:changed');
   }
   //очистка корзины;

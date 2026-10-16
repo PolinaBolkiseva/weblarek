@@ -11,7 +11,7 @@ interface IPreviewExtra {
 // Обработчики действий пользователя на карточке. Карточка — динамический
 // компонент: события не эмитит, а получает готовые коллбеки через конструктор.
 interface IPreviewCardActions {
-  onBasket: () => void; // клик по кнопке корзины
+  onClick: () => void; // клик по кнопке корзины
 }
 
 // VIEW — подробная карточка товара. Заголовок, цену 
@@ -29,10 +29,10 @@ export class PreviewCard extends CatalogCard <IPreviewExtra> {
     this.cardButton = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
     // Клик по кнопке → вызвать переданный обработчик.
-    if (actions?.onBasket) {
+    if (actions?.onClick) {
       this.cardButton.addEventListener('click', (event) => {
         event.stopPropagation();
-        actions.onBasket();
+        actions.onClick();
       });
     } 
   }
@@ -42,7 +42,15 @@ export class PreviewCard extends CatalogCard <IPreviewExtra> {
     this.descriptionElement.textContent = value;
   }
 
+  protected set price(value: number|null) {
+    super.price = value;
+    this.cardButton.disabled = value === null;
+  }
+
   protected set inBasket(value: boolean) {
-    this.cardButton.textContent = value ? 'Удалить из корзины' : 'В корзину';
+    if (this.cardButton.disabled)
+      this.cardButton.textContent = 'Недоступно';
+    else
+      this.cardButton.textContent = value ? 'Удалить из корзины' : 'В корзину';
   }
 }

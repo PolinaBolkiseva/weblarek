@@ -8,7 +8,7 @@ interface ICatalog {
 
 // VIEW — список карточек. Про товары не знает ничего:
 // принимает готовые элементы и раскладывает их в контейнере.
-export class Catalog extends Component<ICatalog> {
+export class Catalog<T = object> extends Component<ICatalog & T> {
   constructor(container: HTMLElement) {
     super(container);
   }

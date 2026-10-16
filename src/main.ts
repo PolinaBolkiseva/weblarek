@@ -10,7 +10,10 @@ import { ProductBasket } from "./components/models/ProductBasket";
 import { Catalog } from "./components/view/Catalog";
 import { CatalogCard } from "./components/view/CatalogCard";
 import { PreviewCard } from "./components/view/PreviewCard";
+import { Basket } from './components/view/Basket';
+import { BasketCard } from './components/view/BasketCard';
 import { Modal } from './components/view/Modal';
+import { Header } from './components/view/Header'
 
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter } from './components/base/Events';
@@ -90,9 +93,18 @@ const events = new EventEmitter();
 // Модалка живёт в статичной разметке страницы.
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'));
 
+// Шапочка
+const header = new Header(ensureElement<HTMLElement>('.header__container'), {
+  onClick: () => events.emit('basket:open'),
+});
+
+const viewBasket = new Basket(cloneTemplate<HTMLElement>('#basket'), {
+  onClick: () => events.emit('basket:order'),
+});
+
 // Подробную карточку тоже создаём один раз — статичный компонент.
 const preview = new PreviewCard(cloneTemplate<HTMLElement>('#card-preview'), {
-  onBasket: () => events.emit('card:basket'),
+  onClick: () => events.emit('card:basket'),
 });
 
 // Модели данных
@@ -100,69 +112,96 @@ const buyer = new Buyer(events);
 const catalog = new ProductCatalog(events);
 const basket = new ProductBasket(events);
 
+// Каталог живёт в статичной разметке страницы.
+const viewCatalog = new Catalog(ensureElement<HTMLElement>('.gallery'));
+
+// --- Отладка ---
+events.onAll(({ eventName, data }) => console.log(eventName, data));
+
+function renderBasket() {
+  const items = basket.getProductList().map((item, index) =>
+    new BasketCard(cloneTemplate<HTMLElement>('#card-basket'), {
+      onClick: () => events.emit('basket:remove', item),
+    }).render({
+      title: item.title,
+      price: item.price,
+      index: index + 1,
+    })
+  );
+
+  return viewBasket.render({
+    items,
+    total: basket.totalSum(),
+  });
+}
+
+events.on('basket:open', () => {
+  modal.render({ content: renderBasket() });
+});
+
+events.on('basket:remove', (item: IProduct) => {
+  basket.popProduct(item);
+});
+
+// Каталог изменился → забрать товары у модели и перерисовать карточки.
+events.on('catalog:changed', () => {
+  console.log("Каталог после ответа сервера:", catalog.getProductList());
+  const cards = catalog.getProductList().map((item) =>
+    new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog'), {
+      // Клик по телу карточки: сообщаем факт — какой товар выбрали.
+      onClick: () => events.emit('card:selected', item),
+    }).render({
+      title: item.title,
+      price: item.price,
+      category: item.category,
+      image: item.image
+    })
+  );
+
+  viewCatalog.render({ items: cards });
+});
+
+events.on('basket:changed', () => {
+  header.render({ counter: basket.totalCount() });
+
+  const product = catalog.getCurrentProduct();
+  if (product) {
+    preview.render({ inBasket: productInBasket(product.id) });
+  }
+
+  renderBasket();
+});
+
+// Выбрали товар → показать подробную карточку в модалке.
+events.on('card:selected', (item: IProduct) => {
+  catalog.setCurrentProduct(item.id);
+  modal.render({
+    content: preview.render({
+      title: item.title,
+      description: item.description,
+      price: item.price,
+      image: item.image,
+      category: item.category,
+      inBasket: productInBasket(item.id),
+    }),
+  });
+});
+
+//по клику добавляем в корзину / удаляем из корзины
+events.on('card:basket', () => {
+  const product = catalog.getCurrentProduct();
+  if (!product || product.price === null) return;
+  if (productInBasket(product.id)) {
+    basket.popProduct(product);
+  } else {
+    basket.pushProduct(product);
+  }
+});
+
 console.log("--- Запрос каталога с сервера ---");
 larekApi
-  .getProductList()  
+  .getProductList()
   .then((data) => {
-    // Визуальные модели
-    // Каталог живёт в статичной разметке страницы.
-    const viewCatalog = new Catalog(ensureElement<HTMLElement>('.gallery'));
-
-    // --- Отладка ---
-    // Для отладки — лог всей событийной «переписки» (приём из урока о сборке приложения).
-    events.onAll(({ eventName, data }) => console.log(eventName, data));
-
-    // -----
-    // Каталог изменился → забрать товары у модели и перерисовать карточки.
-    events.on('catalog:changed', () => {
-      console.log("Каталог после ответа сервера:", catalog.getProductList());
-      const cards = catalog.getProductList().map((item) =>
-        new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog'), {
-          // Клик по телу карточки: сообщаем факт — какой товар выбрали.
-          onClick: () => events.emit('card:selected', item),
-        }).render({
-          title: item.title,
-          price: item.price,
-          category: item.category,
-          image: item.image
-        })
-      );
-
-      viewCatalog.render({ items: cards });
-    });
-
-    // Выбрали товар → показать подробную карточку в модалке.
-    events.on('card:selected', (item: IProduct) => {
-      modal.render({
-        content: preview.render({
-          title: item.title,
-          description: item.description,
-          price: item.price,
-          image: item.image,
-          category: item.category,
-          inBasket: productInBasket(item.id), 
-        }),
-      });
-    });
-
-    //по клику добавляем в корзину / удаляем из корзины
-    events.on('card:basket', () => {
-      const product = catalog.getCurrentProduct();
-      if (!product) return;
-      if (productInBasket(product.id)) {
-        basket.popProduct(product);
-      } else {
-        basket.pushProduct(product);
-      }
-    });
-
-    events.on('basket:changed', () => {
-      const product = catalog.getCurrentProduct();
-      if (!product) return;
-      preview.render({ inBasket: productInBasket(product.id) });
-    });
-
-
     catalog.setProductList(data.items);
   })
   .catch((error) => {
