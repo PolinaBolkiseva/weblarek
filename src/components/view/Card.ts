@@ -27,7 +27,7 @@ export abstract class Card<T = object> extends Component<ICard & T> {
     this.titleElement.textContent = value;
   }
 
-  protected set price(value: number) {
-    this.priceElement.textContent = `${value} ₽`;
+  protected set price(value: number|null) {
+    this.priceElement.textContent = value !== null ? `${value} синапсов` : `бесценно`;
   }
 }
