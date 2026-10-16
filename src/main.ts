@@ -1,5 +1,4 @@
 import "./scss/styles.scss";
-import { apiProducts } from "./utils/data";
 import { Api } from "./components/base/Api";
 import { LarekApi } from "./components/communication/LarekApi";
 import { API_URL } from "./utils/constants";
@@ -37,65 +36,6 @@ function collectErrors(...parts: TErrors[]): { valid: boolean; errors: string } 
   };
 }
 
-/*
-console.log("--- Покупатель ---");
-console.log("После конструктора:", buyer.getBuyer());
-console.log("isValidPayment:", buyer.isValidPayment());
-console.log("isValidEmail:", buyer.isValidEmail());
-console.log("isValidPhone:", buyer.isValidPhone());
-console.log("isValidAddress:", buyer.isValidAddress());
-buyer.setPayment("card");
-buyer.setEmail("polya-sonya@test.com");
-buyer.setPhone("+79990001122");
-buyer.setAddress("Восточная");
-console.log("После сохранения полей:", buyer.getBuyer());
-console.log("isValidPayment:", buyer.isValidPayment());
-console.log("isValidEmail:", buyer.isValidEmail());
-console.log("isValidPhone:", buyer.isValidPhone());
-console.log("isValidAddress:", buyer.isValidAddress());
-buyer.clear();
-console.log("После clear:", buyer.getBuyer());
-console.log("isValidPayment:", buyer.isValidPayment());
-console.log("isValidEmail:", buyer.isValidEmail());
-console.log("isValidPhone:", buyer.isValidPhone());
-console.log("isValidAddress:", buyer.isValidAddress());
-buyer.setPayment("cash");
-buyer.setEmail("polya-sonya@test.com");
-buyer.setPhone("+79990001122");
-buyer.setAddress("Восточная");
-console.log("Покупатель для заказа:", buyer.getBuyer());
-
-console.log("--- Каталог ---");
-catalog.setProductList(apiProducts.items);
-console.log("Список товаров:", catalog.getProductList());
-const firstLocal = catalog.getProductList()[0];
-const secondLocal = catalog.getProductList()[1];
-if (firstLocal) {
-  console.log("Товар по id:", catalog.getProduct(firstLocal.id));
-  catalog.setCurrentProduct(firstLocal.id);
-  console.log("Товар для подробного отображения:", catalog.getCurrentProduct());
-}
-
-console.log("--- Корзина ---");
-if (firstLocal) {
-  basket.pushProduct(firstLocal);
-  basket.pushProduct(firstLocal);
-  if (secondLocal) basket.pushProduct(secondLocal);
-  console.log("После трёх добавлений:", basket.getProductList());
-  console.log("totalSum:", basket.totalSum());
-  console.log("totalCount:", basket.totalCount());
-  console.log("indexProduct:", basket.indexProduct(firstLocal.id));
-  basket.popProduct(firstLocal);
-  console.log("После popProduct:", basket.getProductList());
-  console.log("totalSum:", basket.totalSum());
-  console.log("totalCount:", basket.totalCount());
-  basket.clear();
-  console.log("После clear:", basket.getProductList());
-  console.log("indexProduct после clear:", basket.indexProduct(firstLocal.id));
-  console.log("totalSum:", basket.totalSum());
-  console.log("totalCount:", basket.totalCount());
-}
-*/
 // --- Участники ---
 
 // Единственный брокер на всё приложение.
@@ -143,9 +83,6 @@ const basket = new ProductBasket(events);
 
 // Каталог живёт в статичной разметке страницы.
 const viewCatalog = new Catalog(ensureElement<HTMLElement>('.gallery'));
-
-// --- Отладка ---
-events.onAll(({ eventName, data }) => console.log(eventName, data));
 
 function renderBasket() {
   const items = basket.getProductList().map((item, index) =>
@@ -263,7 +200,6 @@ events.on('basket:remove', (item: IProduct) => {
 
 // Каталог изменился → забрать товары у модели и перерисовать карточки.
 events.on('catalog:changed', () => {
-  console.log("Каталог после ответа сервера:", catalog.getProductList());
   const cards = catalog.getProductList().map((item) =>
     new CatalogCard(cloneTemplate<HTMLElement>('#card-catalog'), {
       // Клик по телу карточки: сообщаем факт — какой товар выбрали.
@@ -314,9 +250,9 @@ events.on('card:basket', () => {
   } else {
     basket.pushProduct(product);
   }
+  modal.close();
 });
 
-console.log("--- Запрос каталога с сервера ---");
 larekApi
   .getProductList()
   .then((data) => {

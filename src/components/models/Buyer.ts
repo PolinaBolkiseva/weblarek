@@ -70,21 +70,21 @@ export class Buyer {
 
   isValidEmail(): TErrors {
     const errorObj: TErrors = {};
-    if (this.email === "")
+    if (this.email.trim() === "")
       errorObj["email"] = "E-mail не указан";
     return errorObj;
   }
 
   isValidPhone(): TErrors {
     const errorObj: TErrors = {};
-    if (this.phone === "")
+    if (this.phone.trim() === "")
       errorObj["phone"] = "номер телефона не указан";
     return errorObj;
   }
 
   isValidAddress(): TErrors {
     const errorObj: TErrors = {};
-    if (this.address === "")
+    if (this.address.trim() === "")
       errorObj["address"] = "адрес не указан";
     return errorObj;
   }

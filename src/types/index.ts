@@ -4,7 +4,7 @@ export type TProductId = string;
 export type TProductList = IProduct[];
 
 export type TErrors = {
-  [object: string]: string; //объект: описание ошибки
+  [field: string]: string; //поле: описание ошибки
 };
 
 export interface IApi {
@@ -33,7 +33,7 @@ export interface IBuyer {
 }
 
 export interface IProductListResponse {
-  tota: number;
+  total: number;
   items: TProductList;
 }
 

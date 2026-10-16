@@ -50,6 +50,6 @@ export class PreviewCard extends CatalogCard <IPreviewExtra> {
     if (this.cardButton.disabled)
       this.cardButton.textContent = 'Недоступно';
     else
-      this.cardButton.textContent = value ? 'Удалить из корзины' : 'В корзину';
+      this.cardButton.textContent = value ? 'Удалить из корзины' : 'Купить';
   }
 }
