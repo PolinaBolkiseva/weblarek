@@ -51,8 +51,7 @@ export class Basket extends Component<IBasketView> {
     this.titleElement.textContent = value === "" ? "Корзина" : value;
   }
 
-  protected set total(value: number | null) {
-    this.totalElement.textContent =
-      value !== null ? `${value} синапсов` : `0 синапсов`;
+  protected set total(value: number) {
+    this.totalElement.textContent = `${value} синапсов`;
   }
 }

@@ -5,7 +5,7 @@ import { CatalogCard } from "./CatalogCard";
 // Добавка подробной карточки к общим данным ICard.
 interface IPreviewExtra {
   description: string;
-  inBasket: boolean;
+  buttonLabel : string;
 }
 
 // Карточка просмотра — статичный элемент: события не эмитит,
@@ -52,8 +52,7 @@ export class PreviewCard extends CatalogCard<IPreviewExtra> {
     this.cardButton.disabled = value === null;
   }
 
-  protected set inBasket(value: boolean) {
-    if (this.cardButton.disabled) this.cardButton.textContent = "Недоступно";
-    else this.cardButton.textContent = value ? "Удалить из корзины" : "Купить";
+  protected set buttonLabel(value: string) {
+    this.cardButton.textContent = value;
   }
 }

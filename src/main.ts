@@ -27,6 +27,17 @@ const larekApi = new LarekApi(api);
 function productInBasket(id: string): boolean {
   return basket.indexProduct(id) != null;
 }
+function getButtonLabel(product: IProduct): string {
+  let buttonLabel = "Недоступно";
+  if (product) {
+    if (!product.price) return buttonLabel;
+    else
+      buttonLabel = productInBasket(product.id)
+        ? "Удалить из корзины"
+        : "Купить";
+  }
+  return buttonLabel;
+}
 
 function collectErrors(...parts: TErrors[]): {
   valid: boolean;
@@ -143,8 +154,6 @@ events.on(
 );
 
 events.on("order:submit", () => {
-  const status = collectErrors(buyer.isValidPayment(), buyer.isValidAddress());
-  if (!status.valid) return;
   modal.render({ content: renderContacts() });
 });
 
@@ -157,14 +166,6 @@ events.on(
 );
 
 events.on("contacts:submit", () => {
-  const status = collectErrors(
-    buyer.isValidPayment(),
-    buyer.isValidAddress(),
-    buyer.isValidEmail(),
-    buyer.isValidPhone(),
-  );
-  if (!status.valid) return;
-
   const data = buyer.getBuyer();
   if (data.payment === null) return;
 
@@ -189,15 +190,7 @@ events.on("contacts:submit", () => {
 });
 
 events.on("buyer:changed", () => {
-  const orderStatus = collectErrors(
-    buyer.isValidPayment(),
-    buyer.isValidAddress(),
-  );
-  viewOrder.render({
-    payment: buyer.getBuyer().payment,
-    valid: orderStatus.valid,
-    errors: orderStatus.errors,
-  });
+  renderOrder();
 
   const contactStatus = collectErrors(
     buyer.isValidEmail(),
@@ -235,27 +228,31 @@ events.on("basket:changed", () => {
 
   const product = catalog.getCurrentProduct();
   if (product) {
-    preview.render({ inBasket: productInBasket(product.id) });
+    preview.render({ buttonLabel: getButtonLabel(product) });
   }
 
   renderBasket();
 });
 
-// Выбрали товар → показать подробную карточку в модалке.
+// Выбрали товар → сообщить о изменении текущего товара.
 events.on("card:selected", (item: IProduct) => {
   catalog.setCurrentProduct(item.id);
-  modal.render({
-    content: preview.render({
-      title: item.title,
-      description: item.description,
-      price: item.price,
-      image: item.image,
-      category: item.category,
-      inBasket: productInBasket(item.id),
-    }),
-  });
 });
-
+// Текущий товар изменился → показать подробную карточку в модалке.
+events.on("currentProduct:changed", () => {
+  const product = catalog.getCurrentProduct();
+  if (product)
+    modal.render({
+      content: preview.render({
+        title: product.title,
+        description: product.description,
+        price: product.price,
+        image: product.image,
+        category: product.category,
+        buttonLabel: getButtonLabel(product),
+      }),
+    });
+});
 //по клику добавляем в корзину / удаляем из корзины
 events.on("card:basket", () => {
   const product = catalog.getCurrentProduct();
