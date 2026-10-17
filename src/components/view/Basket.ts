@@ -40,6 +40,8 @@ export class Basket extends Component<IBasketView> {
     if (actions?.onClick) {
       this.checkoutButton.addEventListener("click", actions.onClick);
     }
+
+    this.items = [];
   }
 
   protected set items(items: HTMLElement[]) {

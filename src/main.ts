@@ -138,11 +138,11 @@ function renderContacts() {
 }
 
 events.on("basket:open", () => {
-  modal.render({ content: renderBasket() });
+  modal.render({ content: viewBasket.render() });
 });
 
 events.on("basket:order", () => {
-  modal.render({ content: renderOrder() });
+  modal.render({ content: viewOrder.render() });
 });
 
 events.on(
@@ -154,7 +154,7 @@ events.on(
 );
 
 events.on("order:submit", () => {
-  modal.render({ content: renderContacts() });
+  modal.render({ content: viewContacts.render() });
 });
 
 events.on(
@@ -191,15 +191,7 @@ events.on("contacts:submit", () => {
 
 events.on("buyer:changed", () => {
   renderOrder();
-
-  const contactStatus = collectErrors(
-    buyer.isValidEmail(),
-    buyer.isValidPhone(),
-  );
-  viewContacts.render({
-    valid: contactStatus.valid,
-    errors: contactStatus.errors,
-  });
+  renderContacts();
 });
 
 events.on("basket:remove", (item: IProduct) => {
